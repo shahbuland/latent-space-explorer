@@ -5,8 +5,11 @@ def _lerp(a, b, t):
 
 def _multi_lerp(L, t):
     """
-    Core of multi-lerp, assumes L is a simple list of tensors (batched is ok)
+    Core of multi-lerp, assumes L is a simple list of tensors with no batch axis
     """
+    if not isinstance(L, list):
+        L = list(L) # Batch -> List
+
     t *= len(L) - 1
     
     min_ind = floor(t) # a = L[min_ind]
@@ -35,17 +38,20 @@ def multi_lerp(L, t):
 
 def _bezier(L, t, weights = None):
     """
-    Core of bezier, assumes L is (batched?) list of tensors
+    Core of bezier, assumes L is list of tensors with no batch axis
 
     :param weights: Weights for points between first and final in L
     """
+    if not isinstance(L, list):
+        L = list(L) # batched -> list
+
     if weights is None:
         weights = [1]*len(L)-2
 
     terms = L
     n = len(terms)
     for i in range(1, len(terms) - 1):
-        terms[i] *= weights[i]
+        terms[i] = terms[i] * weights[i]
     
     for i in range(len(terms)):
         terms[i] = terms[i] * choose(n, i) * (1 - t) ** (n - i) * t ** i
@@ -55,9 +61,14 @@ def _bezier(L, t, weights = None):
 def bezier(L, t, weights = None):
     if isinstance(L, tuple) or isinstance(L, list):
         return (
-            _bezier(L_i, t) for L_i in L
+            _bezier(L_i, t, weights) for L_i in L
         )
     else:
-        return _bezier(L, t)
+        return _bezier(L, t, weights)
 
-    
+def partial_bezier(weights):
+    """
+    Return callable bezier with fixed weights
+    """
+
+    return lambda L, t: bezier(L, t, weights)
