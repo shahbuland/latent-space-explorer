@@ -1,4 +1,4 @@
-from math import floor, ceil
+from math import floor, ceil, comb # last one is choose
 
 def _lerp(a, b, t):
     return a + t * (b - a)
@@ -32,3 +32,32 @@ def multi_lerp(L, t):
         )
     else:
         return _multi_lerp(L, t)
+
+def _bezier(L, t, weights = None):
+    """
+    Core of bezier, assumes L is (batched?) list of tensors
+
+    :param weights: Weights for points between first and final in L
+    """
+    if weights is None:
+        weights = [1]*len(L)-2
+
+    terms = L
+    n = len(terms)
+    for i in range(1, len(terms) - 1):
+        terms[i] *= weights[i]
+    
+    for i in range(len(terms)):
+        terms[i] = terms[i] * choose(n, i) * (1 - t) ** (n - i) * t ** i
+
+    return sum(terms)
+    
+def bezier(L, t, weights = None):
+    if isinstance(L, tuple) or isinstance(L, list):
+        return (
+            _bezier(L_i, t) for L_i in L
+        )
+    else:
+        return _bezier(L, t)
+
+    
