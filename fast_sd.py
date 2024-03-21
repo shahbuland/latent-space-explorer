@@ -2,9 +2,6 @@ from diffusers import AutoencoderTiny
 from hacked_sdxl_pipeline import HackedSDXLPipeline
 import torch
 
-# Uncomment this if you want to compile
-from sfast.compilers.stable_diffusion_pipeline_compiler import (compile, CompilationConfig)
-
 def fast_diffusion_pipeline(model_id = "stabilityai/sdxl-turbo", vae_id = "madebyollin/taesdxl", compile = False):
     """
     :param compile: If true, does a bunch of stuff to make calls fast, but the first call will be very slow as a consequence
