@@ -1,4 +1,5 @@
 from math import floor, ceil, comb # last one is choose
+from copy import deepcopy
 
 def _lerp(a, b, t):
     return a + t * (b - a)
@@ -48,12 +49,14 @@ def _bezier(L, t, weights = None):
     if weights is None:
         weights = [1]*(len(L)-2)
 
-    terms = L
-    n = len(terms)
-    for i in range(1, n - 1):
+    terms = L.copy()
+
+    n = len(terms) - 1
+    
+    for i in range(1, len(terms) - 1):
         terms[i] = terms[i] * weights[i-1]
     
-    for i in range(n):
+    for i in range(len(terms)):
         terms[i] = terms[i] * comb(n, i) * (1 - t) ** (n - i) * t ** i
 
     return sum(terms)
