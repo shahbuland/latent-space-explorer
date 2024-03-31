@@ -5,10 +5,12 @@ from fast_sd import fast_diffusion_pipeline
 from latent_interpolation import bezier, multi_lerp, partial_bezier
 
 import torch
+import numpy as np
+from tqdm import tqdm
 
 class LatentSpaceExplorer:
-    def __init__():
-        self.pipe = fast_diffusion_pipeline()
+    def __init__(self, compile = False):
+        self.pipe = fast_diffusion_pipeline(compile = compile)
         self.encodes = None
 
         self.curve = multi_lerp
@@ -28,18 +30,19 @@ class LatentSpaceExplorer:
         """
         assert len(prompts) > 1, "Need more than one prompt to explore"
 
-        self.encodes = self.pipe.get_encodes(prompts, guidance_scale = 0.0, generator = self.fixed_seed(), num_inference_steps = 1)
+        self.encodes = self.pipe.get_encodes(prompts, generator = self.fixed_seed())
 
     def draw_sample(self, t):
         """
         Draw a sample at a specific t value
         """
         encodes = self.curve(self.encodes, t)
-        res = self.pipe.generate_from_encodes(encodes, guidance_scale = 0.0, generator = self.fixed_seed(), num_inference_steps = 1).images[0]
-    
-    def draw_path(self, min_t, max_t, n_steps = 50) -> List[Image.Image]:
+        res = self.pipe.generate_from_encodes(encodes, generator = self.fixed_seed()).images[0]
+        return res
+
+    def draw_path(self, min_t, max_t, n_steps = 50, progress_bar : bool = True) -> List[Image.Image]:
         t_values = np.linspace(min_t, max_t, n_steps)
-        samples = [self.draw_sample(t) for t in t_values]
+        samples = [self.draw_sample(t) for t in tqdm(t_values)]
         return samples
 
 if __name__ == "__main__":
@@ -48,7 +51,9 @@ if __name__ == "__main__":
     prompts = [f"photograph of a {thing}" for thing in ["dog", "car", "cat"]]
 
     explorer = LatentSpaceExplorer()
+    explorer.set_prompts(prompts)
     explorer.set_curve(partial_bezier([0.00001])) # Very low weight to car
     
+    print("cp1")
     frames = explorer.draw_path(0, 1, n_steps = 10)
     

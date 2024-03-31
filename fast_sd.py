@@ -1,4 +1,4 @@
-from diffusers import AutoencoderTiny
+from diffusers import AutoencoderTiny, StableDiffusionXLPipeline
 from hacked_sdxl_pipeline import HackedSDXLPipeline
 import torch
 
@@ -8,12 +8,16 @@ def fast_diffusion_pipeline(model_id = "stabilityai/sdxl-turbo", vae_id = "madeb
         - If you use this, don't vary the batch size (probably)
     """
 
-    pipe = HackedSDXLPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
+    pipe = HackedSDXLPipeline.from_pretrained(model_id, torch_dtype = torch.float16)
+    pipe.cached_encode = None
     pipe.vae = AutoencoderTiny.from_pretrained(vae_id, torch_dtype=torch.float16)
 
     pipe.to('cuda')
 
     if compile:
+        pipe.unet = torch.compile(pipe.unet)
+        pipe.vae.decode = torch.compile(pipe.vae.decode)
+        """
         from sfast.compilers.stable_diffusion_pipeline_compiler import (compile, CompilationConfig)
 
         config = CompilationConfig()
@@ -25,5 +29,5 @@ def fast_diffusion_pipeline(model_id = "stabilityai/sdxl-turbo", vae_id = "madeb
         config.prefer_lowp_gemm = True
 
         pipe = compile(pipe, config)
-
+        """
     return pipe

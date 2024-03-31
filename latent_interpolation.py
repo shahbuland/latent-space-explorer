@@ -31,7 +31,7 @@ def multi_lerp(L, t):
     """
     if isinstance(L, tuple) or isinstance(L, list):
         return (
-            _multi_lerp(L_i, t) for L_i in L
+            [_multi_lerp(L_i, t) if L_i is not None else None for L_i in L]
         )
     else:
         return _multi_lerp(L, t)
@@ -46,22 +46,22 @@ def _bezier(L, t, weights = None):
         L = list(L) # batched -> list
 
     if weights is None:
-        weights = [1]*len(L)-2
+        weights = [1]*(len(L)-2)
 
     terms = L
     n = len(terms)
-    for i in range(1, len(terms) - 1):
-        terms[i] = terms[i] * weights[i]
+    for i in range(1, n - 1):
+        terms[i] = terms[i] * weights[i-1]
     
-    for i in range(len(terms)):
-        terms[i] = terms[i] * choose(n, i) * (1 - t) ** (n - i) * t ** i
+    for i in range(n):
+        terms[i] = terms[i] * comb(n, i) * (1 - t) ** (n - i) * t ** i
 
     return sum(terms)
     
 def bezier(L, t, weights = None):
     if isinstance(L, tuple) or isinstance(L, list):
         return (
-            _bezier(L_i, t, weights) for L_i in L
+            [_bezier(L_i, t, weights) if L_i is not None else None for L_i in L]
         )
     else:
         return _bezier(L, t, weights)
