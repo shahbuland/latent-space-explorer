@@ -30,7 +30,9 @@ def modify_weights(strings, t_slider_value, *slider_values):
     weights = weights[:len(prompts)-2]
 
     explorer.set_curve(partial_bezier(weights))
-    explorer.set_prompts(prompts)
+    if prompts != explorer.prompts:
+        explorer.set_prompts(prompts)
+
     return explorer.draw_sample(t_slider_value), explorer.visualize(t_slider_value)
 
 N_SLIDERS = 10
