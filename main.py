@@ -37,16 +37,18 @@ class LatentSpaceExplorer:
         """
         assert len(prompts) > 1, "Need more than one prompt to explore"
 
-        def disjoint_uniform(a, b, c, d):
-            if random.random() <= 0.5:
-                return random.uniform(a, b)
+        def alternating_uniform(a, b, c, d, i):
+            if i % 2 == 0:
+                res = random.uniform(a, b)
             else:
-                return random.uniform(c, d)
+                res = random.uniform(c, d)
+            
+            return res
 
         # For visualization
         self.prompts = prompts
         x_values = np.linspace(0, 1, len(prompts))
-        y_values = np.array([0 if i == 0 or i == len(x_values) - 1 else disjoint_uniform(-0.75, -0.25,0.25,0.75) for i in range(len(x_values))])
+        y_values = np.array([0 if i == 0 or i == len(x_values) - 1 else alternating_uniform(-0.75, -0.25,0.25,0.75,i-1) for i in range(len(x_values))])
 
         self.stacked_points = np.stack([x_values, y_values], axis = -1)
 
