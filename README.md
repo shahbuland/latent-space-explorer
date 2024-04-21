@@ -4,7 +4,7 @@ You can find cool things moving between encoded prompts in a conditional diffusi
 
 # Usage  
 
-`python -m main`  
+`pip install -r requirements.txt && python -m main`  
   
 Run the above command to explore. Feel free to mess around with the config to change how sampling is done, font sizes, etc.  
 Controls:  
