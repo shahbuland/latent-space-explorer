@@ -105,6 +105,8 @@ class LatentSpaceExplorer:
         """
         Get encodings directly from points as a tuple with batched encodings
         """
+        if not self.points:
+            return None
         encode_list = [p.encoding for p in self.points] # list of N-tuples
         n = len(encode_list[0])
         res = []
@@ -206,6 +208,9 @@ class LatentSpaceExplorer:
         """
         Detect if mouse is currently in a point. If so, returns index of point, otherwise returns none.
         """
+        if not self.points:
+            return None
+        
         mouse_pos = self.mouse_pos
         points = self.screen_space_points
 
@@ -232,6 +237,7 @@ class LatentSpaceExplorer:
         new_prompts = list(self.prompts)
         del new_prompts[idx]
         self.set_prompts(new_prompts, reset = False)
+        self.selected_point_idx = None
 
     def prepare_to_prompt(self, mode):
         """
@@ -266,7 +272,8 @@ class LatentSpaceExplorer:
         :param reset: Reset xy positions of points?
         """
 
-        encodes = self.get_encodes(prompts)
+        if len(prompts) > 0:
+            encodes = self.get_encodes(prompts)
 
         # First call
         if not self.points or reset:
@@ -393,10 +400,11 @@ class LatentSpaceExplorer:
 
             pygame.draw.circle(self.screen, (255, 255, 255), center, int(radius), 1)
         
-        for idx, point in enumerate(self.screen_space_points):
-            pygame.draw.circle(self.screen, get_point_color(idx), point, self.config.point_thickness)
-            text = self.sample_font.render(self.points[idx].text, True, get_point_color(idx))
-            self.screen.blit(text, point)
+        if len(self.points) > 0:
+            for idx, point in enumerate(self.screen_space_points):
+                pygame.draw.circle(self.screen, get_point_color(idx), point, self.config.point_thickness)
+                text = self.sample_font.render(self.points[idx].text, True, get_point_color(idx))
+                self.screen.blit(text, point)
         
         player_pos = self.get_player_pos_screenspace()
         if player_pos is not None:
