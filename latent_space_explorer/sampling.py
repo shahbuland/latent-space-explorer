@@ -18,7 +18,10 @@ class EncodingSampler:
         """
         device = recursive_find_device(self.encodes)
         dtype = recursive_find_dtype(self.encodes)
-        coefs = torch.from_numpy(coefs).to(device).to(dtype)
+        # NOTE: Convert from float64 first to `dtype` and *then* to `device` to
+        # prevent issues with certain devices not supporting f64
+        # (*cough cough* Apple)
+        coefs = torch.from_numpy(coefs).to(dtype).to(device)
 
         def single_apply(encodes):
             if encodes is None:
