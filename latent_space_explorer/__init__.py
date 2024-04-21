@@ -370,7 +370,7 @@ class LatentSpaceExplorer:
         elif keys[pygame.K_a]:
             idx, sign = 0, -1
         elif keys[pygame.K_d]:
-            idx, sigh = 0, 1
+            idx, sign = 0, 1
 
         if idx is not None and sign is not None:
             self.translation[idx] += sign * self.config.move_speed
